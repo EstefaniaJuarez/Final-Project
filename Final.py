@@ -1,3 +1,7 @@
+A = [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1], [0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00], [0.3025, 0.36, 0.4225, 0.49, 0.5625, 0.64, 0.7225, 0.81, 0.9025, 1], [0.166375, 0.216, 0.274625, 0.343, 0.421875, 0.512, 0.614125, 0.729, 0.857375, 1]]
+
+y = [1.102, 1.099, 1.017, 1.111, 1.117, 1.152, 1.265, 1.380, 1.575, 1.857]
+
 #Scalar Check
 def Check_Scalar(scalar):
   status = True
@@ -113,17 +117,17 @@ def normalize(vector07):
       x.append(vector07[i]/norm)
     return (x)
   
-def QR_factor(matrix):
+def QR_factor(A):
   '''
   This function computes the Modified Gran-Schmidt of the given matrix. It utilizes the two norm to then normalize the vectors in matrix A, which becomes the Q vector. We then use the dot product function on the normalized vector and the second vector in the matrix. The last function we use is vector subtraction, which calculates each normalized vector in the Q matrix. The final result is the factorized matrix A into matrix Q and an upper triangular matrix R.
   '''
-  if Check_Matrix(matrix) == False:
+  if Check_Matrix(A) == False:
     print("invalid input")
   else:
     #We have defined these lengths as variables  to use throughout the function
-    m=len(matrix[0])
-    n=len(matrix)
-    V=matrix
+    m=len(A[0])
+    n=len(A)
+    V=A
     R=[[0]*n for i in range(n)]
     Q=[[0]*m for i in range(n)]
     for i in range(n):
@@ -136,31 +140,44 @@ def QR_factor(matrix):
         temp=scalarVecMulti(R[j][i],Q[i])
         V[j]=vecSubtract(V[j],temp)
     return [Q,R]
-matrix=[[1,0,1],[2,1,0]]
-print(QR_factor(matrix))
 
-QR=QR_factor(matrix)
+QR=QR_factor(A)
 Q=QR[0]
 R=QR[1]
 
 def Trans_matvecMulti(Q,y):
+  '''
+  This function calculates the product of the transpose of Q, which is a matrix, and y, the given data points using matrix, vector multiplication. Instead of calculating the transpose of Q, we can just use Q because this function took a list of rows, not columns, so this allows us to calculate the multiplication because Q is a list of columns.
+  '''
   new_matrix=[]
   for i in range(len(Q)):
     mult = 0
     for j in range(len(y)):
+      #This calculates each element in matrix Q times the respected element in vector y.
       mult +=Q[i][j]*y[j]
+      #This line appends each value froom the above for loop function to the new matrix.
     new_matrix.append(mult)
   return new_matrix
 
+#here we assign the previous function to a value to use in the backsub function.
 b=Trans_matvecMulti(Q,y)
 
 def back_sub(R,b):
+  '''
+  This function takes all of the previously calculated vectors and matrices, Q,R, the data points y, and R and solves for c. The variable c represents the coefficients of the polynomial function from the given the data points in regards to the x values.
+  '''
   r=len(b)-1
   c=[0]*len(b)
   c[r]=b[r]/R[r][r]
+  #this for loop takes len b in reversed order to isolate c.
   for i in reversed(range(len(b))):
     c[i]=b[i]
+    #This for loop calculates each coefficient in vector c.
     for j in range(len(i+1,len(b))):
       c[i]=c[i]-c[j]*R[j][i]
       c[i]=c[i]/R[i][i]
-    return c
+  return c
+
+print(A)
+print(QR_factor(A))
+print(back_sub(R,b))
